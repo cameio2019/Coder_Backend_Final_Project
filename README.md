@@ -30,7 +30,17 @@ Proyecto realizado en el curso de Backend de Coderhouse, en el cual se realizó 
 
 ```sh
 git clone https://github.com/cameio2019/Coder_Backend_Final_Project.git
-cd react-pelu-bb
+
+Backend_ecommerce:
+
+cd Backend_ecommerce
 npm install
 npm start
+
+Fontend_ecommerce
+
+cd Frontend_ecommerce
+npm install
+npm start
+
 ```
