@@ -119,23 +119,30 @@ const updateCart = async(req,res)=>{
 
 const confirmPurchase = async(req,res) =>{
     let {cid} = req.params;
-    let cart = await cartService.getBy({_id:cid});
+    let cart = await cartsService.getBy({_id:cid});
     if(!cart)  return res.status(404).send({status:"error",error:"Can't find cart."});
-    cart.products=[];
-    await cartService.update(cid,cart);
-    res.send({status:"success",message:"Finished purchase!"})
-}
-
-const mail = {
-    from:"Online E-commerce <Online E-commerce>",
-    to: process.env.ADMIN,
-    subject:`nuevo pedido`,
-    html:`
-        <h1>Productos a comprar: </h1>
-        <p>${JSON.stringify(cart.products)}</p>
-    `
-}
-
+    let user = await userService.getBy({cart:cid})
+    if(!user) res.status(404).send({status:"error", error:"Not found."})
+    
+    let cartPopulate = await cartsService.getByWithPopulate({_id:cid})
+    let productsInCart = await cartPopulate.products.map(prod => prod.product)
+    
+    const mail = {
+                from:"Online E-commerce <Online E-commerce>",
+                to: process.env.ADMIN,
+                subject:`nuevo pedido de ${user.email}`,
+                html:`
+                    <h1>Productos comprados de ${user.first_name} ${user.last_name}: </h1>
+                    ${productsInCart.map(prod => `
+                                    <h2>${prod.title}</h2>
+                                    <h3>$${prod.price} por unidad</h3>
+                                    <p>${prod.description}</p>
+                    `)}
+                    <p>${JSON.stringify(cart.products)}</p>
+                `
+            }
+        }
+        
 let emailResult = transport.sendMail(mail)
 console.log(emailResult)
 
